@@ -1,0 +1,168 @@
+{{template "base" .}}
+
+{{define "title"}}
+    Message Board
+{{end}}
+
+{{define "content"}}
+    <h2 class="mt-5">Message Board</h2>
+    <hr>
+    {{/*    <div class="clearfix"></div>*/}}
+
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" class="form-control" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+        <label for="message">Message:</label>
+        <input type="text" name="message" id="message" class="form-control" autocomplete="off">
+    </div>
+    <hr>
+    <a href="javascript:void(0);" class="btn btn-outline-secondary" id="sendBtn">Send Message</a>
+
+    <table id="user-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Message</th>
+            <th>Time</th>
+            {{if eq .userID 1}}
+                <th>Msg ID</th>
+            {{end}}
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+{{end}}
+
+{{define "js"}}
+    {{/*    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>*/}}
+
+    <script>
+        let userField = document.getElementById("username");
+        let messageField = document.getElementById("message");
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // let token = localStorage.getItem("token");
+            let tbody = document.getElementById("user-table").getElementsByTagName("tbody")[0];
+
+            const requestOptions = {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    // 'Authorization': 'Bearer ' + token,
+                },
+            }
+
+            fetch("http://localhost:4001/api/message", requestOptions)
+                .then(response => response.json())
+                .then(function (data) {
+                    if (data) {
+                        data.forEach(function (i) {
+                            let newRow = tbody.insertRow();
+                            let newCell = newRow.insertCell();
+
+                            let item = document.createTextNode(i.username);
+                            newCell.appendChild(item);
+
+                            // newCell.innerHTML = `<a href="/admin/all-customers/${i.customer_id}/accounts">ID: ${i.customer_id}</a>`;
+                            newCell = newRow.insertCell();
+                            item = document.createTextNode(i.message);
+                            newCell.appendChild(item);
+
+                            newCell = newRow.insertCell();
+                            item = document.createTextNode(i.time);
+                            newCell.appendChild(item);
+
+                            {{if eq .userID 1}}
+                            newCell = newRow.insertCell();
+                            newCell.innerHTML = `<a href="/message/${i.id}"> modify ID ${i.id}</a>`;
+                            // newCell.appendChild(item);
+                            {{end}}
+
+                        });
+                    } else {
+                        let newRow = tbody.insertRow();
+                        let newCell = newRow.insertCell();
+                        newCell.setAttribute("colspan", "3");
+                        newCell.innerHTML = "no data available";
+                    }
+                    let a = localStorage.getItem("userID")
+                    console.log(a)
+
+
+                })
+        })
+
+
+        document.getElementById("sendBtn").addEventListener("click", function () {
+            if ((userField.value === "") || (messageField.value === "")) {
+                notie.alert({
+                    type: 'error',
+                    text: "Fill out username and message!",
+                })
+                // errorMessage("Fill out username and message!");
+                return false;
+            } else {
+                sendMessage()
+                console.log(userField, messageField)
+            }
+        })
+
+        messageField.addEventListener("keydown", function (event) {
+            if (event.code === "Enter") {
+                if ((userField.value === "") || (messageField.value === "")) {
+                    notie.alert({
+                        type: 'error',
+                        text: "Fill out username and message!",
+                    })
+                    return false;
+                } else {
+                    sendMessage()
+                    console.log(userField, messageField)
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        })
+
+        function sendMessage() {
+            let payload = {
+                username: userField.value,
+                message: messageField.value,
+
+            }
+
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            }
+
+            fetch("http://localhost:4001/api/message", requestOptions)
+                .then(response => response.json())
+                .then(function (data) {
+                    if (data.error) {
+                        notie.alert({
+                            type: 'error',
+                            text: data.message,
+                        })
+                    } else {
+                        location.href = "/";
+                    }
+                })
+
+        }
+
+    </script>
+{{end}}
