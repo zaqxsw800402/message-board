@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/joho/godotenv"
-	"html/template"
 	"log"
 	"msg-board/web/model"
 	"net/http"
@@ -23,11 +22,10 @@ type config struct {
 }
 
 type application struct {
-	config        config
-	logger        *log.Logger
-	templateCache map[string]*template.Template
-	DB            *model.DB
-	Session       *session.Store
+	config  config
+	logger  *log.Logger
+	DB      *model.DB
+	Session *session.Store
 }
 
 func (app *application) serve() error {
@@ -69,7 +67,7 @@ func main() {
 	cfg.api = os.Getenv("API")
 
 	logger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	//conn, err := mysql.OpenDb(cfg.mysql.dsn)
+
 	conn, err := model.GetDBClient(cfg.db.dsn)
 	if err != nil {
 		logger.Fatal(err)
@@ -79,14 +77,11 @@ func main() {
 	store := session.New()
 	//session.Config{Storage: sqlite3.New()}
 
-	tc := make(map[string]*template.Template)
-
 	app := &application{
-		config:        cfg,
-		logger:        logger,
-		templateCache: tc,
-		DB:            model.New(conn),
-		Session:       store,
+		config:  cfg,
+		logger:  logger,
+		DB:      model.New(conn),
+		Session: store,
 	}
 
 	err = app.serve()

@@ -14,20 +14,16 @@ import (
 
 type config struct {
 	port int
-	env  string
 	db   struct {
 		dsn string
 	}
-
-	frontend  string
-	secretKey string
+	frontend string
 }
 
 type application struct {
 	config config
 	logger *log.Logger
 	mg     *MessageHandler
-	//ch    CustomerHandler
 }
 
 func (app *application) serve() error {
@@ -40,7 +36,7 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.logger.Printf("ServingStarting Back end server in %s mode on port %d", app.config.env, app.config.port)
+	app.logger.Printf("ServingStarting Back end server in on port %d", app.config.port)
 
 	return srv.ListenAndServe()
 }
@@ -76,10 +72,6 @@ func main() {
 	}
 
 	messageRepositoryDb := domain.NewMessageRepository(dbClient)
-
-	//建立各個Handlers
-	//ch := CustomerHandler{service.NewCustomerService(customerRepositoryDb)}
-
 	mg := NewMessageHandler(service.NewMessageService(messageRepositoryDb))
 
 	app := &application{
