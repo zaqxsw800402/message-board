@@ -11,15 +11,20 @@ func (app *application) DefaultData(c *fiber.Ctx) fiber.Map {
 	if err != nil {
 		return nil
 	}
+
 	m := fiber.Map{}
+	m["api"] = app.config.api
+
 	keys := sess.Get("userID")
 
 	if keys != nil {
 		m["IsAuthenticated"] = 1
 		m["userID"] = keys
+		m["username"] = sess.Get("username")
 	} else {
 		m["IsAuthenticated"] = 0
 		m["userID"] = 0
+		m["username"] = ""
 	}
 
 	return m
@@ -36,7 +41,9 @@ func (app *application) Home(c *fiber.Ctx) error {
 }
 
 func (app *application) Login(c *fiber.Ctx) error {
-	if err := c.Render("templates/login", fiber.Map{}); err != nil {
+	err := c.Render("templates/login", fiber.Map{})
+
+	if err != nil {
 		app.logger.Println(err)
 		return err
 	}
@@ -83,13 +90,14 @@ func (app *application) PostLoginPage(c *fiber.Ctx) error {
 	email := c.FormValue("email")
 	password := c.FormValue("password")
 
-	id, err := app.DB.Authenticate(email, password)
+	user, err := app.DB.Authenticate(email, password)
 	if err != nil {
 		c.Redirect("/login", http.StatusSeeOther)
 		return err
 	}
 
-	sess.Set("userID", id)
+	sess.Set("userID", user.ID)
+	sess.Set("username", user.FirstName)
 	sess.Save()
 
 	c.Redirect("/", http.StatusSeeOther)
@@ -104,6 +112,7 @@ func (app *application) Logout(c *fiber.Ctx) error {
 	}
 
 	sess.Delete("userID")
+	sess.Delete("username")
 	sess.Save()
 
 	c.Redirect("/", http.StatusSeeOther)

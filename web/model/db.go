@@ -28,19 +28,19 @@ type User struct {
 	Password  string `gorm:"column:password"`
 }
 
-func (m *DB) Authenticate(email, password string) (int, error) {
+func (m *DB) Authenticate(email, password string) (*User, error) {
 
 	var user User
 	result := m.DB.Table("users").Where("email = ?", email).Find(&user)
 	if err := result.Error; err != nil {
-		return user.ID, err
+		return nil, err
 	}
 
 	if user.Password != password {
-		return user.ID, fmt.Errorf("wrong password")
+		return nil, fmt.Errorf("wrong password")
 	}
 
-	return user.ID, nil
+	return &user, nil
 
 }
 
