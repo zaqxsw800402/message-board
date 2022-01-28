@@ -12,9 +12,9 @@ import (
 var templateFS embed.FS
 
 func (app *application) routes() http.Handler {
-	//engine := html.NewFileSystem(http.Dir("./templates"), ".gohtml")
 	engine := html.NewFileSystem(http.FS(templateFS), ".gohtml")
-	//
+	//engine := html.NewFileSystem(http.Dir("./templates"), ".gohtml")
+
 	// Reload the templates on each render, good for development
 	engine.Reload(true) // Optional. Default: false
 	//
