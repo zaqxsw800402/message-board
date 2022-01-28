@@ -29,17 +29,18 @@ func (app *application) saveMessage(c *fiber.Ctx) error {
 		badRequest(c, err.Error())
 		return err
 	}
+
 	goodResponse(c, "success")
 	return nil
 }
 
 func (app *application) getMessages(c *fiber.Ctx) error {
-
 	msgs, err := app.mg.service.GetMessages()
 	if err != nil {
 		badRequest(c, err.Error())
 		return err
 	}
+
 	c.JSON(msgs)
 	return nil
 }
@@ -59,6 +60,7 @@ func (app *application) updateMessage(c *fiber.Ctx) error {
 		badRequest(c, err.Error())
 		return err
 	}
+
 	goodResponse(c, "success")
 	return nil
 }
@@ -71,6 +73,7 @@ func (app *application) deleteMessage(c *fiber.Ctx) error {
 		badRequest(c, err.Error())
 		return err
 	}
+
 	goodResponse(c, "success")
 	return nil
 }
@@ -86,8 +89,8 @@ func (app *application) newUser(c *fiber.Ctx) error {
 
 	err = app.mg.service.SaveUser(user)
 	if err != nil {
-		badRequest(c, "failed to save user")
-		return err
+		badRequest(c, "repeated email")
+		return nil
 	}
 
 	goodResponse(c, "success")

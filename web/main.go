@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/gofiber/storage/sqlite3"
 	"github.com/joho/godotenv"
 	"html/template"
 	"log"
@@ -77,8 +76,8 @@ func main() {
 	}
 
 	// set up store
-	store := session.New(
-		session.Config{Storage: sqlite3.New()})
+	store := session.New()
+	//session.Config{Storage: sqlite3.New()}
 
 	tc := make(map[string]*template.Template)
 
