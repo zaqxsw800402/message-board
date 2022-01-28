@@ -11,7 +11,10 @@ func (app *application) DefaultData(c *fiber.Ctx) fiber.Map {
 	if err != nil {
 		return nil
 	}
+
 	m := fiber.Map{}
+	m["api"] = app.config.api
+
 	keys := sess.Get("userID")
 
 	if keys != nil {
